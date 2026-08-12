@@ -1,0 +1,22 @@
+# Segredos e ambiente
+.env
+.venv/
+
+# Dados de origem
+data/raw/*.csv
+!data/raw/.gitkeep
+
+# Python 
+__pycache__/
+*.py[cod]
+
+# Power BI
+*.pbix
+
+# Saídas geradas
+RELATORIO.docx
+
+# Sistema operacional
+Thumbs.db
+desktop.ini
+.DS_Store

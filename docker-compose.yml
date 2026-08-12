@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: lh_nautical_db
+    restart: unless-stopped
+
+    environment:
+       POSTGRES_DB: lh_nautical
+       POSTGRES_USER: lighthouse
+       POSTGRES_PASSWORD: lighthouse
+
+    ports:
+      - "5444:5432"
+
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lighthouse -d lh_nautical"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      
+volumes:
+  pgdata:
+    name: lh_nautical_pgdata
