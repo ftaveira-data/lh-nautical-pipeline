@@ -18,6 +18,9 @@ from datetime import datetime
 
 RE_INTEIRO = re.compile(r"^[+-]?\d+$")
 RE_DECIMAL = re.compile(r"^[+-]?\d+\.\d+$")
+RE_IDENTIFICADOR = re.compile(
+    r"(^|_)(cpf|cnpj|tax_id|ncm_code|barcode_ean|postal_code|number)$"
+)
 
 BOOLEANOS = {"TRUE", "FALSE", "T", "F"}
 
@@ -141,9 +144,12 @@ class Coluna:
             self.maior_magnitude = max(self.maior_magnitude, abs(int(corpo)))
 
     def tipo_sql(self) -> str:
-        if not self.viu_algum_valor:
-            return "TEXT"  # coluna inteiramente vazia
+        if RE_IDENTIFICADOR.search(self.nome.lower()):
+            return "TEXT"
 
+        if not self.viu_algum_valor:
+            return "TEXT"
+        
         for tipo in PRECEDENCIA:
             if tipo in self.candidatos:
                 if tipo == "INTEGER":
