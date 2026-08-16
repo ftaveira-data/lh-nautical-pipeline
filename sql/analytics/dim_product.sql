@@ -8,7 +8,12 @@
 -- como tabelas separadas seria snowflake, que degrada o desempenho no
 -- Power BI sem ganho de espaço relevante — são 14 categorias e 4 marcas.
 
-CREATE OR REPLACE VIEW analytics.dim_product AS
+-- DROP antes do CREATE porque o PostgreSQL só aceita CREATE OR REPLACE
+-- VIEW quando as colunas novas entram no fim da lista. Aqui a coluna
+-- categoria_original nasce no meio, ao lado da que ela documenta.
+DROP VIEW IF EXISTS analytics.dim_product;
+
+CREATE VIEW analytics.dim_product AS
 SELECT
     v.id                                        AS variante_id,
     v.sku,
@@ -26,7 +31,14 @@ SELECT
     p.is_active                                 AS produto_ativo,
 
     cat.id                                      AS categoria_id,
-    cat.name                                    AS categoria,
+    -- 'SEGURANÇA' está em caixa alta enquanto as outras 13 categorias
+    -- usam Title Case. A correção só toca valores inteiramente maiúsculos,
+    -- para não estragar nomes com capitalização intencional.
+    CASE
+        WHEN cat.name = UPPER(cat.name) THEN INITCAP(cat.name)
+        ELSE cat.name
+    END                                         AS categoria,
+    cat.name                                    AS categoria_original,
     pai.name                                    AS categoria_pai,
 
     m.id                                        AS marca_id,
