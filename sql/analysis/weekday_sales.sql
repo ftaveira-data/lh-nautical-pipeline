@@ -33,5 +33,11 @@ SELECT
 
 FROM analytics.dim_calendar c
 LEFT JOIN vendas_diarias    v ON v.data = c.data
+
+-- A dimensão cobre até janeiro de 2027 porque existem devoluções
+-- posteriores à última venda. A premissa da análise é o intervalo entre
+-- a primeira e a última venda, então o recorte é declarado aqui.
+WHERE c.eh_periodo_de_vendas
+
 GROUP BY c.dia_semana_num, c.dia_semana
 ORDER BY media_diaria ASC;

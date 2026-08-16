@@ -1,24 +1,46 @@
 -- Dimensão de calendário.
 --
--- Cobre todos os dias entre a primeira e a última venda registrada,
--- inclusive os dias sem nenhum pedido. É essa continuidade que permite
--- distinguir "vendeu zero" de "não há linha na tabela".
+-- Cobre todos os dias entre a primeira e a última data presente em
+-- QUALQUER fato, não apenas em vendas. Devoluções acontecem depois da
+-- compra: existem 17 devoluções em janeiro de 2027, posteriores à última
+-- venda registrada. Um calendário construído só a partir de orders
+-- deixaria essas linhas sem correspondência na dimensão, e o Power BI
+-- criaria um membro "(Em branco)" para acomodá-las.
+--
+-- A coluna eh_periodo_de_vendas marca o recorte que a análise por dia da
+-- semana usa: o intervalo entre a primeira e a última venda. A dimensão
+-- descreve o universo inteiro; quem filtra é a consulta.
 --
 -- Construída como view para acompanhar automaticamente a extensão do
--- período conforme novos pedidos entram.
+-- período conforme novos registros entram.
 
 CREATE SCHEMA IF NOT EXISTS analytics;
 
-CREATE OR REPLACE VIEW analytics.dim_calendar AS
-WITH periodo AS (
+DROP VIEW IF EXISTS analytics.dim_calendar;
+
+CREATE VIEW analytics.dim_calendar AS
+WITH limites AS (
     SELECT
-        MIN(placed_at)::date AS inicio,
-        MAX(placed_at)::date AS fim
-    FROM raw.orders
+        (SELECT MIN(placed_at)::date  FROM raw.orders)  AS primeira_venda,
+        (SELECT MAX(placed_at)::date  FROM raw.orders)  AS ultima_venda,
+        (SELECT MIN(created_at)::date FROM raw.returns) AS primeira_devolucao,
+        (SELECT MAX(created_at)::date FROM raw.returns) AS ultima_devolucao
+),
+
+periodo AS (
+    SELECT
+        LEAST(primeira_venda, primeira_devolucao) AS inicio,
+        GREATEST(ultima_venda, ultima_devolucao)  AS fim,
+        primeira_venda,
+        ultima_venda
+    FROM limites
 ),
 
 dias AS (
-    SELECT generate_series(inicio, fim, INTERVAL '1 day')::date AS data
+    SELECT
+        generate_series(inicio, fim, INTERVAL '1 day')::date AS data,
+        primeira_venda,
+        ultima_venda
     FROM periodo
 )
 
@@ -55,5 +77,6 @@ SELECT
     END                                          AS mes_nome,
 
     EXTRACT(ISODOW FROM data) >= 6               AS eh_fim_de_semana,
+    data BETWEEN primeira_venda AND ultima_venda AS eh_periodo_de_vendas,
     DATE_TRUNC('month', data)::date              AS primeiro_dia_do_mes
 FROM dias;
