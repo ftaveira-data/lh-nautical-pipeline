@@ -100,14 +100,11 @@ LIMITE_INTEGER = 2_147_483_647
 
 
 class Coluna:
-    """
-    Acumula evidências sobre uma coluna sem guardar os valores.
-    A memória não cresce com o tamanho do arquivo.
-    """
+    """Acumula evidências sobre uma coluna sem guardar os valores lidos."""
 
     def __init__(self, nome: str):
         self.nome = nome
-        self.candidatos = set(VERIFICADORES)  # tudo é possível no início
+        self.candidatos = set(VERIFICADORES)
         self.aceita_nulo = False
         self.viu_algum_valor = False
         self.maior_magnitude = 0
@@ -121,8 +118,8 @@ class Coluna:
 
     def observar(self, valor: str) -> None:
         if valor == "":
-            # Vazio é ausência de valor, não valor de tipo errado.
-            # Não elimina candidato nenhum: só marca a coluna como nullable.
+            # Vazio é ausência de valor, não valor de tipo errado: marca a
+            # coluna como nullable sem eliminar nenhum candidato.
             self.aceita_nulo = True
             return
 
@@ -135,7 +132,7 @@ class Coluna:
             else:
                 self.valores_vistos.add(valor)
 
-        # O coração do algoritmo: sobrevive quem aceita este valor.
+        # Eliminação: sobrevive o tipo que aceita este valor.
         self.candidatos = {
             tipo for tipo in self.candidatos if VERIFICADORES[tipo](valor)
         }
@@ -170,7 +167,7 @@ class Coluna:
                     return f"NUMERIC({precisao}, {self.max_casas_decimais})"
                 return tipo
 
-        return "TEXT"  # nenhum candidato sobreviveu
+        return "TEXT"
 
     def pode_ser_chave(self) -> bool:
         """
@@ -201,8 +198,8 @@ def analisar_csv(caminho: Path) -> tuple[list[Coluna], int]:
     """
     Percorre o arquivo inteiro uma vez, alimentando um acumulador por coluna.
 
-    csv.reader devolve uma linha por vez: o arquivo nunca fica inteiro
-    na memória, então o custo não cresce com o tamanho do CSV.
+    csv.reader devolve uma linha por vez: o arquivo nunca fica inteiro na
+    memória, então o custo não cresce com o tamanho do CSV.
     """
     with caminho.open(newline="", encoding="utf-8") as arquivo:
         leitor = csv.reader(arquivo)

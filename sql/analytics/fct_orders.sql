@@ -8,7 +8,12 @@
 -- decisão explícita — cancelados e rascunhos têm total preenchido e
 -- representam 14,8% do valor somado.
 
-CREATE OR REPLACE VIEW analytics.fct_orders AS
+-- DROP antes do CREATE: o PostgreSQL só aceita CREATE OR REPLACE VIEW
+-- quando as colunas novas entram no fim da lista, e status_desc nasce
+-- ao lado da coluna que ela traduz.
+DROP VIEW IF EXISTS analytics.fct_orders;
+
+CREATE VIEW analytics.fct_orders AS
 SELECT
     o.id                                        AS pedido_id,
     o.order_number                              AS numero_pedido,
@@ -25,6 +30,14 @@ SELECT
     END                                         AS canal_desc,
 
     o.status,
+    CASE o.status
+        WHEN 'paid'      THEN 'Pago'
+        WHEN 'confirmed' THEN 'Confirmado'
+        WHEN 'cancelled' THEN 'Cancelado'
+        WHEN 'draft'     THEN 'Rascunho'
+        ELSE o.status
+    END                                         AS status_desc,
+
     o.status IN ('paid', 'confirmed')           AS eh_receita_realizada,
 
     o.subtotal,

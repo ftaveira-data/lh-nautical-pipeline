@@ -23,7 +23,7 @@ SCHEMA = "raw"
 # --- Conexão --------------------------------------------------------------
 
 def conectar() -> psycopg.Connection:
-    """Credenciais vêm do .env — nunca escritas no código."""
+    """Credenciais vêm do .env, que não é versionado."""
     load_dotenv()
     return psycopg.connect(
         host=os.getenv("PGHOST", "localhost"),
@@ -72,11 +72,9 @@ def ler_cabecalho(caminho: Path) -> list[str]:
 
 def carregar_arquivo(conexao: psycopg.Connection, caminho: Path) -> int:
     """
-    COPY entrega o arquivo ao PostgreSQL e deixa que ele interprete.
-    Nenhum parsing acontece no Python: o conteúdo vai do disco para o banco
-    sem passar por transformação alguma.
+    Envia o arquivo via COPY e devolve a contagem de linhas na tabela.
 
-    Devolve a contagem de linhas na tabela após a carga.
+    O parsing fica a cargo do PostgreSQL: o Python só repassa os bytes.
     """
     tabela = caminho.stem
     colunas = ", ".join(f'"{c}"' for c in ler_cabecalho(caminho))
