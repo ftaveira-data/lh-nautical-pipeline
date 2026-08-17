@@ -42,7 +42,10 @@ def carregar_serie_mensal(diretorio: Path, produto: str) -> pd.Series:
 
     vendas = (
         itens.loc[itens["product_variant_id"].isin(ids_variante)]
-        .merge(pedidos[["id", "placed_at"]], left_on="order_id", right_on="id")
+        .merge(
+            pedidos[["id", "placed_at"]].rename(columns={"id": "order_id"}),
+            on="order_id",
+        )
     )
 
     vendas["mes"] = pd.to_datetime(vendas["placed_at"]).dt.to_period("M")

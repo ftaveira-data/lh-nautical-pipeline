@@ -6,15 +6,12 @@
 data/raw/*.csv
 !data/raw/.gitkeep
 
-# Python 
+# Python
 __pycache__/
 *.py[cod]
 
-# Power BI
-*.pbix
-
-# Saídas geradas
-RELATORIO.docx
+# Rascunho das respostas do formulário: material de trabalho, não entregável
+docs/respostas.md
 
 # Sistema operacional
 Thumbs.db

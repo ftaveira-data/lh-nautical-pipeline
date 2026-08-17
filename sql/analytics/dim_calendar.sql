@@ -1,18 +1,17 @@
 -- Dimensão de calendário.
 --
--- Cobre todos os dias entre a primeira e a última data presente em
--- QUALQUER fato, não apenas em vendas. Devoluções acontecem depois da
--- compra: existem 17 devoluções em janeiro de 2027, posteriores à última
--- venda registrada. Um calendário construído só a partir de orders
--- deixaria essas linhas sem correspondência na dimensão, e o Power BI
+-- Cobre todos os dias entre a primeira e a última data de QUALQUER fato,
+-- não apenas de vendas: existem 17 devoluções em janeiro de 2027,
+-- posteriores à última venda registrada. Um calendário construído só a
+-- partir de orders deixaria essas linhas sem correspondência, e o Power BI
 -- criaria um membro "(Em branco)" para acomodá-las.
 --
--- A coluna eh_periodo_de_vendas marca o recorte que a análise por dia da
--- semana usa: o intervalo entre a primeira e a última venda. A dimensão
--- descreve o universo inteiro; quem filtra é a consulta.
+-- A coluna eh_periodo_de_vendas marca o intervalo entre a primeira e a
+-- última venda. A dimensão descreve o universo inteiro; quem recorta é a
+-- consulta.
 --
--- Construída como view para acompanhar automaticamente a extensão do
--- período conforme novos registros entram.
+-- É uma view para acompanhar a extensão do período conforme novos
+-- registros entram.
 
 CREATE SCHEMA IF NOT EXISTS analytics;
 
@@ -55,8 +54,8 @@ SELECT
     EXTRACT(ISODOW  FROM data)::int              AS dia_semana_num,
 
     -- ISODOW: 1 = segunda ... 7 = domingo.
-    -- Traduzido por CASE em vez de to_char porque o locale do servidor
-    -- não é garantido — a imagem do Postgres sobe com locale C.
+    -- Traduzido por CASE em vez de to_char porque o locale do servidor não
+    -- é garantido: a imagem do Postgres sobe com locale C.
     CASE EXTRACT(ISODOW FROM data)
         WHEN 1 THEN 'Segunda-feira'
         WHEN 2 THEN 'Terça-feira'
