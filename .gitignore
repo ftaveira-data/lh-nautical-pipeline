@@ -1,0 +1,19 @@
+# Segredos e ambiente
+.env
+.venv/
+
+# Dados de origem
+data/raw/*.csv
+!data/raw/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Rascunho das respostas do formulário: material de trabalho, não entregável
+docs/respostas.md
+
+# Sistema operacional
+Thumbs.db
+desktop.ini
+.DS_Store

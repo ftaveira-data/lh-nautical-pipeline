@@ -1,0 +1,8 @@
+# Normaliza o fim de linha no repositório, independente do sistema
+# operacional de quem commitou. O Git guarda LF no histórico e devolve
+# o formato nativo de cada máquina ao clonar.
+* text=auto
+
+# Arquivos que devem manter LF sempre, inclusive no Windows:
+# scripts de shell quebram se receberem CRLF.
+*.sh text eol=lf
